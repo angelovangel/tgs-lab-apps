@@ -31,7 +31,12 @@ Access apps by going to `http://localhost:[PORT]`.
 
 ```bash
 cd tgs-opentrons-apps
+
+# Build and push all apps
 ./build_and_push.sh aangeloo latest
+
+# Build and push specific app(s) only (3rd positional argument)
+./build_and_push.sh aangeloo latest rapid-barcoding-ont,kinnex-ot2
 ```
 
 ---
