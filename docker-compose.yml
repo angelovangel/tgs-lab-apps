@@ -1,0 +1,88 @@
+name: tgs-opentrons-apps
+
+# NOTE for deployment on Remote Server:
+#
+# On the remote server, simply copy this file and run:
+#   docker compose pull
+#   docker compose up -d
+
+services:
+  rapid-barcoding-ont:
+    image: ${DOCKER_USER:-aangeloo}/rapid-barcoding-ont:latest
+    build:
+      context: ../rapid-barcoding-ont
+      dockerfile: Dockerfile
+    container_name: shiny_rapid_barcoding
+    ports:
+      - "3801:3838"
+    restart: unless-stopped
+    environment:
+      - TZ=UTC
+
+  custom-transfer-opentrons:
+    image: ${DOCKER_USER:-aangeloo}/custom-transfer-opentrons:latest
+    build:
+      context: ../custom-transfer-opentrons
+      dockerfile: Dockerfile
+    container_name: shiny_custom_transfer
+    ports:
+      - "3802:3838"
+    restart: unless-stopped
+    environment:
+      - TZ=UTC
+
+  kinnex-ot2:
+    image: ${DOCKER_USER:-aangeloo}/kinnex-ot2:latest
+    build:
+      context: ../kinnex-ot2
+      dockerfile: Dockerfile
+    container_name: shiny_kinnex_ot2
+    ports:
+      - "3803:3838"
+    restart: unless-stopped
+    environment:
+      - TZ=UTC
+
+  sanger-opentrons:
+    image: ${DOCKER_USER:-aangeloo}/sanger-opentrons:latest
+    build:
+      context: ../sanger-opentrons
+      dockerfile: Dockerfile
+    container_name: shiny_sanger_opentrons
+    ports:
+      - "3804:3838"
+    restart: unless-stopped
+    environment:
+      - TZ=UTC
+
+  tracer:
+    image: ${DOCKER_USER:-aangeloo}/tracer:latest
+    build:
+      context: ../tracer
+      dockerfile: Dockerfile
+    container_name: shiny_tracer
+    ports:
+      - "3805:3838"
+    restart: unless-stopped
+    environment:
+      - TZ=UTC
+
+  nxf-minimapper:
+    image: ${DOCKER_USER:-aangeloo}/minimapper-app:latest
+    build:
+      context: ../minimapper-app
+      dockerfile: Dockerfile
+    container_name: shiny_nxf_minimapper
+    ports:
+      - "3806:3838"
+    privileged: true
+    devices:
+      - /dev/loop-control:/dev/loop-control
+    volumes:
+      - /dev:/dev:ro
+      # Persist Singularity images on host
+      - ${PWD}/singularity_cache:/root/.singularity:rw
+    restart: unless-stopped
+    environment:
+      - TZ=UTC
+      - NXF_SINGULARITY_CACHEDIR=/root/.singularity/cache
