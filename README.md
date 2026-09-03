@@ -31,17 +31,20 @@ Access apps by going to `http://localhost:[PORT]`.
 
 Only docker with docker compose plugin is needed on the server
 ```bash
-curl -sSl https://raw.githubusercontent.com/angelovangel/tgs-lab-apps/refs/heads/main/docker-compose.yml | docker compose -f - up -d
-```
+wget https://raw.githubusercontent.com/angelovangel/tgs-lab-apps/refs/heads/main/docker-compose.yml
 
-Or, first transfer the `docker-compose.yml` file in a folder on your remote server and run the following commands:
-
-```bash
-cd your_folder
-docker compose pull
-docker compose up -d
+# to start all apps
+docker compose -f up -d
+# to start a specific app only (e.g. rapid-barcoding-ont)
+docker compose up -d rapid-barcoding-ont
 # to stop
 docker compose down
+```
+You need to allow access to ports `3801`to`3806` on your server firewall.
+```bash
+sudo ufw allow 3801:3806/tcp
+sudo ufw reload
+sudo ufw status
 ```
 
 Access apps by going to `http://[SERVER_IP]:[PORT]`. Check status with `docker compose ps` and `docker compose stats`
