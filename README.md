@@ -27,7 +27,26 @@ Access apps by going to `http://localhost:[PORT]`.
 
 ---
 
-## 📤 Build & Push to Docker Hub
+## 🖥 Remote Server Deployment
+
+Only docker with docker compose plugin is needed on the server
+```bash
+curl -sSl https://raw.githubusercontent.com/angelovangel/tgs-lab-apps/refs/heads/main/docker-compose.yml | docker compose -f - up -d
+```
+
+Or, first transfer the `docker-compose.yml` file in a folder on your remote server and run the following commands:
+
+```bash
+cd your_folder
+docker compose pull
+docker compose up -d
+# to stop
+docker compose down
+```
+
+Access apps by going to `http://[SERVER_IP]:[PORT]`. Check status with `docker compose ps` and `docker compose stats`
+
+## 📤 Development - Build & Push to Docker Hub
 
 ```bash
 cd tgs-opentrons-apps
@@ -40,17 +59,3 @@ cd tgs-opentrons-apps
 ```
 
 ---
-
-## 🖥 Remote Server Deployment (Image Pulling)
-
-Transfer the `docker-compose.yml` file in a folder on your remote server and run the following commands:
-
-```bash
-cd your_folder
-docker compose pull
-docker compose up -d
-# to stop
-docker compose down
-```
-
-Access apps by going to `http://[SERVER_IP]:[PORT]`. Check status with `docker compose ps` and `docker compose stats`
