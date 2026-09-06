@@ -86,3 +86,28 @@ services:
     environment:
       - TZ=UTC
       - NXF_SINGULARITY_CACHEDIR=/root/.singularity/cache
+
+  nxf-shiny:
+    image: ${DOCKER_USER:-aangeloo}/nxf-shiny:latest
+    build:
+      context: ../nxf-shiny
+      dockerfile: Dockerfile
+    container_name: shiny_nxf_shiny
+    ports:
+      - "3807:3838"
+    privileged: true
+    devices:
+      - /dev/loop-control:/dev/loop-control
+      - /dev/fuse:/dev/fuse
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - seccomp:unconfined
+    volumes:
+      - /dev:/dev:ro
+      - /mnt:/mnt:rw
+      - ${PWD}/singularity_cache:/root/.singularity:rw
+    restart: unless-stopped
+    environment:
+      - TZ=UTC
+      - NXF_SINGULARITY_CACHEDIR=/root/.singularity/cache

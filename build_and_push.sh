@@ -26,6 +26,7 @@ ALL_APPS=(
   "sanger-opentrons"
   "tracer"
   "minimapper-app"
+  "nxf-shiny"
 )
 
 # Filter APPS array if specific target apps are provided in 3rd argument
