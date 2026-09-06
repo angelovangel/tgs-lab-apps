@@ -85,6 +85,18 @@ def detect_server_ip() -> str:
     except Exception:
         pass
 
+    macos_interfaces = ["en0", "en1", "en2", "bridge100", "utun0"]
+    for iface in macos_interfaces:
+        try:
+            ip = subprocess.check_output(["ipconfig", "getifaddr", iface], text=True, stderr=subprocess.DEVNULL).strip()
+        except Exception:
+            continue
+        if ip and not _is_docker_alias(ip):
+            if ip.startswith("10."):
+                return ip
+            if _is_private_ip(ip):
+                return ip
+
     try:
         hostname_ip = socket.gethostbyname(socket.gethostname())
         if hostname_ip and _is_private_ip(hostname_ip):
