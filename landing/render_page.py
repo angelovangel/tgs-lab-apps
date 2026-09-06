@@ -27,7 +27,23 @@ def _is_docker_alias(ip: str) -> bool:
         "gateway.docker.internal",
         "host-gateway",
     }
-    return value in invalid_values or value.startswith("host.docker.internal") or value.startswith("gateway.docker.internal")
+    if value in invalid_values or value.startswith("host.docker.internal") or value.startswith("gateway.docker.internal"):
+        return True
+
+    if value.startswith("169.254."):
+        return True
+
+    if value.startswith("10."):
+        return True
+
+    if value.startswith("172."):
+        try:
+            second_octet = int(value.split(".", 2)[1])
+            return 17 <= second_octet <= 31
+        except ValueError:
+            return False
+
+    return False
 
 
 def detect_server_ip() -> str:
@@ -41,14 +57,14 @@ def detect_server_ip() -> str:
         result = subprocess.check_output(["hostname", "-I"], text=True, stderr=subprocess.DEVNULL)
         ips = [part.strip() for part in result.split() if part.strip()]
         for ip in ips:
-            if ip and ip != "127.0.0.1":
+            if ip and not _is_docker_alias(ip):
                 return ip
     except Exception:
         pass
 
     try:
         hostname_ip = socket.gethostbyname(socket.gethostname())
-        if hostname_ip and hostname_ip != "127.0.0.1":
+        if hostname_ip and not _is_docker_alias(hostname_ip):
             return hostname_ip
     except Exception:
         pass
