@@ -112,7 +112,7 @@ def render_html(services, server_ip: str, status_map: dict[str, str]) -> str:
             """
             <tr>
               <td>{name}</td>
-              <td><a href="{url}">{url}</a></td>
+              <td><a href="{url}" target="_blank" rel="noopener noreferrer">{url}</a></td>
               <td>{notes}</td>
               <td><span style="display:inline-block;padding:4px 8px;border-radius:999px;background-color:{color};color:white;font-weight:bold;">{label}</span></td>
             </tr>
