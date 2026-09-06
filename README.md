@@ -12,7 +12,7 @@ Containerized deployment setup for Opentrons automation and Nextflow minimapper 
 4. **`sanger-opentrons`** (Port: `3804`)
 5. **`tracer`** (Port: `3805`)
 6. **`nxf-minimapper`** (`minimapper-app`, Port: `3806`, uses Singularity by default)
-7. **`nxf-shiny`** (Port: `3807`), run various Nextflow apps, use `-profile singularity` 
+7. **`nxf-shiny`** (Port: `3807`), run various Nextflow apps, use `-profile singularity` , the server needs to have a path `/mnt`
 
 ---
 

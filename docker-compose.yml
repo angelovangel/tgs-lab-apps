@@ -81,7 +81,7 @@ services:
     volumes:
       - /dev:/dev:ro
       # Persist Singularity images on host
-      - ${PWD}/singularity_cache:/root/.singularity:rw
+      - ${HOME}/.singularity_cache:/root/.singularity:rw
     restart: unless-stopped
     environment:
       - TZ=UTC
@@ -106,8 +106,10 @@ services:
     volumes:
       - /dev:/dev:ro
       - /mnt:/mnt:rw
-      - ${PWD}/singularity_cache:/root/.singularity:rw
+      - ${HOME}:/home/shiny:rw
+      - ${HOME}/.singularity_cache:/root/.singularity:rw
     restart: unless-stopped
     environment:
+      - HOME=/home/shiny
       - TZ=UTC
       - NXF_SINGULARITY_CACHEDIR=/root/.singularity/cache
