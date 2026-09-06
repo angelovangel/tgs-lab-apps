@@ -19,14 +19,6 @@ def detect_server_ip() -> str:
     if env_ip and env_ip.strip() not in ("", "localhost"):
         return env_ip.strip()
 
-    for host_name in ("host.docker.internal", "gateway.docker.internal"):
-        try:
-            resolved = socket.gethostbyname(host_name)
-            if resolved and resolved != "127.0.0.1":
-                return resolved
-        except Exception:
-            pass
-
     try:
         result = subprocess.check_output(["hostname", "-I"], text=True, stderr=subprocess.DEVNULL)
         ips = [part.strip() for part in result.split() if part.strip()]
