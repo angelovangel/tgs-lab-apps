@@ -72,7 +72,7 @@ docker compose up -d landing
 Then open:
 
 ```text
-http://<SERVER_IP>/
+http://<SERVER_IP>:8088/
 ```
 
 The page is generated from `landing/services.json` and `landing/render_page.py`.
