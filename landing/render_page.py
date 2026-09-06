@@ -33,9 +33,6 @@ def _is_docker_alias(ip: str) -> bool:
     if value.startswith("169.254."):
         return True
 
-    if value.startswith("10."):
-        return True
-
     if value.startswith("172."):
         try:
             second_octet = int(value.split(".", 2)[1])
@@ -43,6 +40,23 @@ def _is_docker_alias(ip: str) -> bool:
         except ValueError:
             return False
 
+    return False
+
+
+def _is_private_ip(ip: str) -> bool:
+    value = (ip or "").strip()
+    if not value or _is_docker_alias(value):
+        return False
+    if value.startswith("10."):
+        return True
+    if value.startswith("192.168."):
+        return True
+    if value.startswith("172."):
+        try:
+            second_octet = int(value.split(".", 2)[1])
+            return 16 <= second_octet <= 31
+        except ValueError:
+            return False
     return False
 
 
@@ -56,14 +70,25 @@ def detect_server_ip() -> str:
     try:
         result = subprocess.check_output(["hostname", "-I"], text=True, stderr=subprocess.DEVNULL)
         ips = [part.strip() for part in result.split() if part.strip()]
-        for ip in ips:
-            if ip and not _is_docker_alias(ip):
-                return ip
+
+        preferred_candidates = [ip for ip in ips if ip and ip.startswith("10.") and not _is_docker_alias(ip)]
+        if preferred_candidates:
+            return preferred_candidates[0]
+
+        private_ips = [ip for ip in ips if ip and _is_private_ip(ip)]
+        if private_ips:
+            return private_ips[0]
+
+        valid_ips = [ip for ip in ips if ip and not _is_docker_alias(ip)]
+        if valid_ips:
+            return valid_ips[0]
     except Exception:
         pass
 
     try:
         hostname_ip = socket.gethostbyname(socket.gethostname())
+        if hostname_ip and _is_private_ip(hostname_ip):
+            return hostname_ip
         if hostname_ip and not _is_docker_alias(hostname_ip):
             return hostname_ip
     except Exception:
