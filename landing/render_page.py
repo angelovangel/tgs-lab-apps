@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import json
 import os
+import re
 import socket
 import subprocess
 from pathlib import Path
@@ -14,10 +15,27 @@ COMPOSE_FILE = ROOT.parent / "docker-compose.yml"
 REFRESH_SECONDS = int(os.environ.get("REFRESH_SECONDS", "15"))
 
 
+def _is_docker_alias(ip: str) -> bool:
+    value = (ip or "").strip().lower()
+    if not value:
+        return True
+    invalid_values = {
+        "localhost",
+        "127.0.0.1",
+        "::1",
+        "host.docker.internal",
+        "gateway.docker.internal",
+        "host-gateway",
+    }
+    return value in invalid_values or value.startswith("host.docker.internal") or value.startswith("gateway.docker.internal")
+
+
 def detect_server_ip() -> str:
     env_ip = os.environ.get("SERVER_IP")
-    if env_ip and env_ip.strip() not in ("", "localhost"):
-        return env_ip.strip()
+    if env_ip:
+        candidate = env_ip.strip()
+        if candidate and not _is_docker_alias(candidate):
+            return candidate
 
     try:
         result = subprocess.check_output(["hostname", "-I"], text=True, stderr=subprocess.DEVNULL)
@@ -45,50 +63,105 @@ def detect_server_ip() -> str:
     return "127.0.0.1"
 
 
+def get_compose_project_name() -> str:
+    try:
+        compose_text = COMPOSE_FILE.read_text()
+    except Exception:
+        return "tgs-lab-apps"
+
+    match = re.search(r"^\s*name:\s*['\"]?([^'\"\n]+)", compose_text, re.M)
+    return match.group(1).strip() if match else "tgs-lab-apps"
+
+
 def get_compose_status_map() -> dict[str, str]:
     status_map: dict[str, str] = {}
+    project_name = get_compose_project_name()
 
     try:
         result = subprocess.check_output(
-            [
-                "docker",
-                "ps",
-                "-a",
-                "--filter",
-                "label=com.docker.compose.project=tgs-opentrons-apps",
-                "--format",
-                "{{.Label \"com.docker.compose.service\"}}|{{.State}}",
-            ],
+            ["docker", "compose", "-f", str(COMPOSE_FILE), "ps", "--all", "--format", "json"],
+            cwd=str(ROOT.parent),
             stderr=subprocess.DEVNULL,
             text=True,
         )
     except (subprocess.CalledProcessError, FileNotFoundError):
+        result = ""
+
+    raw_items = []
+    if result.strip():
+        try:
+            parsed = json.loads(result)
+            if isinstance(parsed, list):
+                raw_items = parsed
+            elif isinstance(parsed, dict):
+                raw_items = [parsed]
+        except json.JSONDecodeError:
+            raw_items = []
+
+    if not raw_items:
+        for line in result.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                payload = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if isinstance(payload, dict):
+                raw_items.append(payload)
+
+    if not raw_items:
+        try:
+            fallback = subprocess.check_output(
+                [
+                    "docker",
+                    "ps",
+                    "-a",
+                    "--filter",
+                    f"label=com.docker.compose.project={project_name}",
+                    "--format",
+                    "{{.Label \"com.docker.compose.service\"}}|{{.State}}",
+                ],
+                stderr=subprocess.DEVNULL,
+                text=True,
+            )
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            fallback = ""
+
+        for line in fallback.splitlines():
+            line = line.strip()
+            if not line or "|" not in line:
+                continue
+            service_name, state = line.split("|", 1)
+            if service_name.strip():
+                status_map[service_name.strip()] = state.strip()
         return status_map
 
-    for line in result.splitlines():
-        line = line.strip()
-        if not line or "|" not in line:
+    for item in raw_items:
+        if not isinstance(item, dict):
             continue
-        service_name, state = line.split("|", 1)
-        service_name = service_name.strip()
-        state = state.strip()
-        if service_name:
-            status_map[service_name] = state
+        name = item.get("Service") or item.get("Name")
+        state = item.get("Status") or item.get("State") or ""
+        if not name:
+            continue
+        status_map[str(name)] = str(state)
 
     return status_map
 
 
 def status_label(raw_status: str) -> str:
-    status = (raw_status or "").strip().lower()
+    status = (raw_status or "").strip()
     if not status:
         return "Not started"
-    if "running" in status or status.startswith("up"):
+
+    normalized = status.lower()
+    if normalized == "running" or normalized.startswith("up "):
         return "Running"
-    if "restarting" in status:
+    if normalized.startswith("restarting"):
         return "Restarting"
-    if "exited" in status or status.startswith("exited") or "created" in status:
+    if normalized in {"created", "exited", "dead", "paused"} or normalized.startswith("exited"):
         return "Stopped"
-    return "Not started"
+    return status.title()
 
 
 def render_html(services, server_ip: str, status_map: dict[str, str]) -> str:
@@ -108,15 +181,16 @@ def render_html(services, server_ip: str, status_map: dict[str, str]) -> str:
             color = "#dc3545"
         else:
             color = "#6c757d"
+        badge_text = raw_status or "Not started"
         rows.append(
             """
             <tr>
               <td>{name}</td>
               <td><a href="{url}" target="_blank" rel="noopener noreferrer">{url}</a></td>
               <td>{notes}</td>
-              <td><span style="display:inline-block;padding:4px 8px;border-radius:999px;background-color:{color};color:white;font-weight:bold;">{label}</span></td>
+              <td><span style="display:inline-block;padding:4px 8px;border-radius:999px;background-color:{color};color:white;font-weight:bold;">{badge_text}</span></td>
             </tr>
-            """.format(name=name, url=url, notes=notes, color=color, label=label)
+            """.format(name=name, url=url, notes=notes, color=color, badge_text=badge_text)
         )
 
     return f"""
