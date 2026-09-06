@@ -60,6 +60,23 @@ sudo ufw status
 
 Access apps by going to `http://[SERVER_IP]:[PORT]`. Check status with `docker compose ps` and `docker compose stats`
 
+## 🌐 Landing Page
+
+A static landing page is included under the `landing/` folder. It renders a table of app URLs from the service list and auto-detects the server IP.
+
+```bash
+export SERVER_IP=$(hostname -I | awk '{print $1}')
+docker compose up -d landing
+```
+
+Then open:
+
+```text
+http://<SERVER_IP>/
+```
+
+The page is generated from `landing/services.json` and `landing/render_page.py`.
+
 ## 📤 Development - Build & Push to Docker Hub
 
 ```bash

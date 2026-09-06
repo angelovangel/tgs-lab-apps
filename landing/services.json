@@ -1,0 +1,9 @@
+[
+  {"name": "rapid-barcoding-ont", "port": 3801, "notes": "ONT rapid barcoding"},
+  {"name": "custom-transfer-opentrons", "port": 3802, "notes": "Transfer workflow"},
+  {"name": "kinnex-ot2", "port": 3803, "notes": "Kinnex PCR setup"},
+  {"name": "sanger-opentrons", "port": 3804, "notes": "Sanger setup"},
+  {"name": "tracer", "port": 3805, "notes": "Sanger QC"},
+  {"name": "nxf-minimapper", "port": 3806, "notes": "minimapper-app; Singularity"},
+  {"name": "nxf-shiny", "port": 3807, "notes": "Nextflow apps; requires /mnt"}
+]
