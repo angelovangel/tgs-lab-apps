@@ -6,25 +6,35 @@ Containerized deployment setup for Opentrons automation and Nextflow minimapper 
 
 ## 📦 Included Services
 
-1. **`rapid-barcoding-ont`** (Port: `3801`)
-2. **`custom-transfer-opentrons`** (Port: `3802`)
-3. **`kinnex-ot2`** (Port: `3803`)
-4. **`sanger-opentrons`** (Port: `3804`)
-5. **`tracer`** (Port: `3805`)
-6. **`nxf-minimapper`** (`minimapper-app`, Port: `3806`, uses Singularity by default)
-7. **`nxf-shiny`** (Port: `3807`), run various Nextflow apps, use `-profile singularity` , the server needs to have a path `/mnt`
+| Service | Port | Notes |
+| --- | ---: | --- |
+| `rapid-barcoding-ont` | `3801` | Setup ONT rapid barcoding on Opentrons OT-2 |
+| `custom-transfer-opentrons` | `3802` | One step transfer setup on OT-2 and Flex |
+| `kinnex-ot2` | `3803` | Setup Kinnex PCR on Opentrons OT-2 |
+| `sanger-opentrons` | `3804` | Setup Sanger reactions on Opentrons OT-2 |
+| `tracer` | `3805` | Sanger files QC |
+| `nxf-minimapper` | `3806` | `minimapper-app`; uses Singularity by default |
+| `nxf-shiny` | `3807` | Run various Nextflow apps; use `-profile singularity`; server needs a `/mnt` path |
 
 ---
 
 ## 🚀 How to Run Locally
 
 ```bash
-cd tgs-opentrons-apps
+cd tgs-lab-apps
 
-# Build images and start services
-docker compose up -d --build
+# Start one of the services
+docker compose up -d rapid-barcoding-ont
 ```
-Access apps by going to `http://localhost:[PORT]`.
+Access the app by going to `http://localhost:3801`.
+
+```bash
+cd tgs-lab-apps
+
+# start all services
+docker compose up -d
+```
+Access apps by going to `http://localhost:[PORT]`
 
 ---
 

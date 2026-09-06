@@ -106,7 +106,7 @@ services:
     volumes:
       - /dev:/dev:ro
       - /mnt:/mnt:rw
-      - ${HOME}:/home/shiny:rw
+      #- ${HOME}:/home/shiny:rw
       - ${HOME}/.singularity_cache:/root/.singularity:rw
     restart: unless-stopped
     environment:
