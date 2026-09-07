@@ -13,13 +13,13 @@ This folder renders a tiny static landing page with links to each app in the sta
 ```bash
 cd landing
 SERVER_IP=$(hostname -I | awk '{print $1}') python render_page.py
-python -m http.server 80
+python -m http.server 8088
 ```
 
 Then open:
 
 ```text
-http://localhost/
+http://localhost:8088/
 ```
 
 ## Run via Docker Compose
@@ -35,9 +35,9 @@ Add this service to the main compose file:
     environment:
       SERVER_IP: ${SERVER_IP}
     command: >
-      sh -c "python render_page.py && python -m http.server 80 --directory /app"
+      sh -c "python render_page.py && python -m http.server 8088 --directory /app"
     ports:
-      - "80:80"
+      - "8088:8088"
 ```
 
 Then start it with:
@@ -45,4 +45,10 @@ Then start it with:
 ```bash
 export SERVER_IP=$(hostname -I | awk '{print $1}')
 docker compose up -d landing
+```
+
+Then open:
+
+```text
+http://localhost:8088/
 ```

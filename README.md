@@ -71,13 +71,6 @@ export SERVER_IP=$(hostname -I | awk '{print $1}')
 docker compose up -d landing
 ```
 
-Set the real host IP before starting the landing page:
-
-```bash
-export SERVER_IP=$(hostname -I | awk '{print $1}')
-docker compose up -d --force-recreate landing
-```
-
 Then open:
 
 ```text

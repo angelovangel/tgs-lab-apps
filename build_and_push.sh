@@ -27,6 +27,7 @@ ALL_APPS=(
   "tracer"
   "minimapper-app"
   "nxf-shiny"
+  "zinter"
 )
 
 # Filter APPS array if specific target apps are provided in 3rd argument

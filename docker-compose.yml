@@ -128,3 +128,15 @@ services:
       - HOME=/home/shiny
       - TZ=UTC
       - NXF_SINGULARITY_CACHEDIR=/root/.singularity/cache
+
+  zinter:
+    image: ${DOCKER_USER:-aangeloo}/zinter:latest
+    build:
+      context: ../zinter
+      dockerfile: Dockerfile
+    container_name: shiny_zinter
+    ports:
+      - "3808:3838"
+    restart: unless-stopped
+    environment:
+      - TZ=UTC
