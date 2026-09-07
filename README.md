@@ -21,6 +21,7 @@ Containerized deployment setup for Opentrons automation and Nextflow minimapper 
 ## 🚀 How to Run Locally
 
 ```bash
+git clone https://github.com/angelovangel/tgs-lab-apps.git
 cd tgs-lab-apps
 
 # Start one of the services
@@ -40,9 +41,10 @@ Access apps by going to `http://localhost:[PORT]`
 
 ## 🖥 Remote Server Deployment
 
-Only docker with docker compose plugin is needed on the server
+Only git and docker with docker compose plugin is needed on the server
 ```bash
-wget https://raw.githubusercontent.com/angelovangel/tgs-lab-apps/refs/heads/main/docker-compose.yml
+git clone https://github.com/angelovangel/tgs-lab-apps.git
+cd tgs-lab-apps
 
 # to start all apps
 docker compose -f up -d
@@ -51,7 +53,7 @@ docker compose up -d rapid-barcoding-ont
 # to stop
 docker compose down
 ```
-You need to allow access to ports `3801`to`3806` on your server firewall.
+You may need to allow access to ports `3801`to`3806` on your server firewall.
 ```bash
 sudo ufw allow 3801:3806/tcp
 sudo ufw reload
