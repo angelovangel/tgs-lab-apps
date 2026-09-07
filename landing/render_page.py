@@ -324,8 +324,18 @@ def main() -> None:
     services = json.loads(SERVICES_PATH.read_text())
     server_ip = detect_server_ip()
     status_map = get_compose_status_map()
-    HTML_PATH.write_text(render_html(services, server_ip, status_map))
-    print(f"Rendered landing page for {server_ip} with {len(status_map)} docker statuses")
+    html = render_html(services, server_ip, status_map)
+    tmp_path = HTML_PATH.with_name(HTML_PATH.name + ".tmp")
+    try:
+        tmp_path.write_text(html)
+        os.replace(str(tmp_path), str(HTML_PATH))
+        print(f"Rendered landing page for {server_ip} with {len(status_map)} docker statuses")
+    finally:
+        try:
+            if tmp_path.exists():
+                tmp_path.unlink()
+        except Exception:
+            pass
 
 
 if __name__ == "__main__":
