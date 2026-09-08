@@ -102,34 +102,6 @@ services:
       - TZ=UTC
       - NXF_SINGULARITY_CACHEDIR=/root/.singularity/cache
 
-  nxf-shiny:
-    image: ${DOCKER_USER:-aangeloo}/nxf-shiny:latest
-    build:
-      context: ../nxf-shiny
-      dockerfile: Dockerfile
-    container_name: shiny_nxf_shiny
-    ports:
-      - "3807:3838"
-    privileged: true
-    devices:
-      - /dev/loop-control:/dev/loop-control
-      - /dev/fuse:/dev/fuse
-    cap_add:
-      - SYS_ADMIN
-    security_opt:
-      - seccomp:unconfined
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /dev:/dev:ro
-      - /mnt:/mnt:rw
-      #- ${HOME}:/home/shiny:rw
-      - ${HOME}/.singularity_cache:/root/.singularity:rw
-    restart: unless-stopped
-    environment:
-      - HOME=/home/shiny
-      - TZ=UTC
-      - NXF_SINGULARITY_CACHEDIR=/root/.singularity/cache
-
   zinter:
     image: ${DOCKER_USER:-aangeloo}/zinter:latest
     build:
