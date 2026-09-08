@@ -28,6 +28,7 @@ ALL_APPS=(
   "minimapper-app"
   "nxf-shiny"
   "zinter"
+  "faster-app"
 )
 
 # Filter APPS array if specific target apps are provided in 3rd argument

@@ -5,5 +5,6 @@
   {"name": "sanger-opentrons", "port": 3804, "notes": "Sanger setup"},
   {"name": "tracer", "port": 3805, "notes": "Sanger QC"},
   {"name": "nxf-minimapper", "port": 3806, "notes": "minimapper-app; Singularity"},
-  {"name": "zinter", "port": 3808, "notes": "Shiny app to generate 2D barcode labels for printing"}
+  {"name": "zinter", "port": 3808, "notes": "Shiny app to generate 2D barcode labels for printing"},
+  {"name": "faster-app", "port": 3809, "notes": "FASTQ file stats, runs in your browser"}
 ]
