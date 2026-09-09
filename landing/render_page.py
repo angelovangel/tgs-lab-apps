@@ -68,7 +68,7 @@ def detect_server_ip() -> str:
             return candidate
 
     try:
-        result = subprocess.check_output(["hostname", "-I"], text=True, stderr=subprocess.DEVNULL)
+        result = subprocess.check_output(["hostname", "-I"], text=True, stderr=subprocess.DEVNULL, timeout=5)
         ips = [part.strip() for part in result.split() if part.strip()]
 
         preferred_candidates = [ip for ip in ips if ip and ip.startswith("10.") and not _is_docker_alias(ip)]
@@ -88,7 +88,7 @@ def detect_server_ip() -> str:
     macos_interfaces = ["en0", "en1", "en2", "bridge100", "utun0"]
     for iface in macos_interfaces:
         try:
-            ip = subprocess.check_output(["ipconfig", "getifaddr", iface], text=True, stderr=subprocess.DEVNULL).strip()
+            ip = subprocess.check_output(["ipconfig", "getifaddr", iface], text=True, stderr=subprocess.DEVNULL, timeout=5).strip()
         except Exception:
             continue
         if ip and not _is_docker_alias(ip):
@@ -136,8 +136,9 @@ def get_compose_status_map() -> dict[str, str]:
             cwd=str(ROOT.parent),
             stderr=subprocess.DEVNULL,
             text=True,
+            timeout=10,
         )
-    except (subprocess.CalledProcessError, FileNotFoundError):
+    except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
         result = ""
 
     raw_items = []
@@ -177,8 +178,9 @@ def get_compose_status_map() -> dict[str, str]:
                 ],
                 stderr=subprocess.DEVNULL,
                 text=True,
+                timeout=10,
             )
-        except (subprocess.CalledProcessError, FileNotFoundError):
+        except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
             fallback = ""
 
         for line in fallback.splitlines():

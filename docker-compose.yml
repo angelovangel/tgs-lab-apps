@@ -16,8 +16,9 @@ services:
     environment:
       SERVER_IP: ${SERVER_IP:-}
       REFRESH_SECONDS: ${REFRESH_SECONDS:-15}
+      PORT: 8088
     command: >
-      sh -c 'apk add --no-cache docker-cli >/dev/null 2>&1 || true; python render_page.py && while true; do sleep "${REFRESH_SECONDS:-15}"; python render_page.py; done & exec python -m http.server 8088 --directory /app'
+      sh -c 'apk add --no-cache docker-cli >/dev/null 2>&1 || true; exec python server.py'
     ports:
       - "8088:8088"
     restart: unless-stopped
