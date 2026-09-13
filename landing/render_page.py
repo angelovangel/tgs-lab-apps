@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import json
 import os
+import platform
 import re
 import socket
 import subprocess
@@ -227,7 +228,105 @@ def status_label(raw_status: str) -> tuple[str, str]:
     return status.title(), status
 
 
-def render_html(services, server_ip: str, status_map: dict[str, str]) -> str:
+def get_server_info() -> dict:
+    """Collect basic server information: uname, CPU count, total memory, and live usage."""
+    info: dict = {}
+
+    # uname
+    try:
+        uname = platform.uname()
+        info["uname"] = f"{uname.system} {uname.node} {uname.release} {uname.machine}"
+    except Exception:
+        info["uname"] = "unknown"
+
+    # CPU count
+    try:
+        result = subprocess.check_output(["nproc"], text=True, stderr=subprocess.DEVNULL, timeout=5)
+        info["cpus"] = result.strip()
+    except Exception:
+        try:
+            info["cpus"] = str(os.cpu_count() or "unknown")
+        except Exception:
+            info["cpus"] = "unknown"
+
+    # Total + available memory from /proc/meminfo
+    mem_total_kb: int | None = None
+    mem_avail_kb: int | None = None
+    try:
+        meminfo = Path("/proc/meminfo").read_text()
+        parsed_mem: dict[str, int] = {}
+        for line in meminfo.splitlines():
+            for key in ("MemTotal", "MemAvailable"):
+                if line.startswith(key + ":"):
+                    parsed_mem[key] = int(line.split()[1])
+        mem_total_kb = parsed_mem.get("MemTotal")
+        mem_avail_kb = parsed_mem.get("MemAvailable")
+        if mem_total_kb:
+            info["mem"] = f"{mem_total_kb / 1024 / 1024:.1f} GB"
+        else:
+            info["mem"] = "unknown"
+    except Exception:
+        info["mem"] = "unknown"
+
+    # Memory usage %
+    try:
+        if mem_total_kb and mem_avail_kb is not None:
+            info["mem_pct"] = round((mem_total_kb - mem_avail_kb) / mem_total_kb * 100, 1)
+        else:
+            info["mem_pct"] = None
+    except Exception:
+        info["mem_pct"] = None
+
+    # CPU usage % — two /proc/stat reads 200 ms apart
+    try:
+        import time
+
+        def _read_cpu_stat() -> tuple[int, int]:
+            line = Path("/proc/stat").read_text().splitlines()[0]
+            fields = list(map(int, line.split()[1:]))
+            idle = fields[3] + (fields[4] if len(fields) > 4 else 0)  # idle + iowait
+            return sum(fields), idle
+
+        t1, i1 = _read_cpu_stat()
+        time.sleep(0.2)
+        t2, i2 = _read_cpu_stat()
+        dt, di = t2 - t1, i2 - i1
+        info["cpu_pct"] = round((1 - di / dt) * 100, 1) if dt else None
+    except Exception:
+        info["cpu_pct"] = None
+
+    return info
+
+
+def _usage_color(pct: float | None) -> str:
+    if pct is None:
+        return "#aaa"
+    if pct >= 85:
+        return "#dc3545"
+    if pct >= 60:
+        return "#fd7e14"
+    return "#198754"
+
+
+def _fmt_pct(pct: float | None) -> str:
+    return f"{pct:.1f}%" if pct is not None else "n/a"
+
+
+def _usage_bar(pct: float | None, width: int = 60) -> str:
+    """Return an inline SVG mini progress bar."""
+    if pct is None:
+        return ""
+    filled = max(0, min(int(pct / 100 * width), width))
+    color = _usage_color(pct)
+    return (
+        f'<svg width="{width}" height="8" style="vertical-align:middle;border-radius:4px;overflow:hidden;">'
+        f'<rect width="{width}" height="8" fill="#e9ecef"/>'
+        f'<rect width="{filled}" height="8" fill="{color}"/>'
+        f'</svg>'
+    )
+
+
+def render_html(services, server_ip: str, status_map: dict[str, str], server_info: dict | None = None) -> str:
     rows = []
     for svc in services:
         name = svc["name"]
@@ -255,7 +354,9 @@ def render_html(services, server_ip: str, status_map: dict[str, str]) -> str:
             """.format(name=name, url=url, notes=notes, color=color, badge_text=badge_text)
         )
 
-    return f"""
+    rows_html = "".join(rows)
+    si = server_info or {}
+    return """
 <!doctype html>
 <html lang="en">
   <head>
@@ -301,16 +402,16 @@ def render_html(services, server_ip: str, status_map: dict[str, str]) -> str:
         font-size: 14px;
       }}
     </style>
-    <meta http-equiv="refresh" content="{REFRESH_SECONDS}" />
+    <meta http-equiv="refresh" content="{refresh}" />
     <script>
       setTimeout(function() {{
         window.location.reload();
-      }}, {REFRESH_SECONDS * 1000});
+      }}, {refresh_ms});
     </script>
   </head>
   <body>
     <h1>TGS Lab Apps</h1>
-    <div class="meta">Auto-refreshing every {REFRESH_SECONDS} seconds</div>
+    <div class="meta">Auto-refreshing every {refresh} seconds</div>
     <table>
       <thead>
         <tr>
@@ -321,19 +422,38 @@ def render_html(services, server_ip: str, status_map: dict[str, str]) -> str:
         </tr>
       </thead>
       <tbody>
-        {''.join(rows)}
+        {rows}
       </tbody>
     </table>
+  <footer style="margin-top:28px;max-width:1100px;font-size:12px;color:#888;border-top:1px solid #ddd;padding-top:10px;display:flex;flex-wrap:wrap;gap:20px;align-items:center;">
+    <span><strong>Server:</strong> {uname}</span>
+    <span><strong>CPUs:</strong> {cpus} &nbsp;{cpu_bar}&nbsp;<span style="color:{cpu_color};font-weight:600;">{cpu_pct_str}</span></span>
+    <span><strong>Memory:</strong> {mem} &nbsp;{mem_bar}&nbsp;<span style="color:{mem_color};font-weight:600;">{mem_pct_str}</span></span>
+  </footer>
   </body>
 </html>
-"""
+""".format(
+        refresh=REFRESH_SECONDS,
+        refresh_ms=REFRESH_SECONDS * 1000,
+        rows=rows_html,
+        uname=si.get("uname", "unknown"),
+        cpus=si.get("cpus", "unknown"),
+        mem=si.get("mem", "unknown"),
+        cpu_bar=_usage_bar(si.get("cpu_pct")),
+        cpu_color=_usage_color(si.get("cpu_pct")),
+        cpu_pct_str=_fmt_pct(si.get("cpu_pct")),
+        mem_bar=_usage_bar(si.get("mem_pct")),
+        mem_color=_usage_color(si.get("mem_pct")),
+        mem_pct_str=_fmt_pct(si.get("mem_pct")),
+    )
 
 
 def main() -> None:
     services = json.loads(SERVICES_PATH.read_text())
     server_ip = detect_server_ip()
     status_map = get_compose_status_map()
-    html = render_html(services, server_ip, status_map)
+    server_info = get_server_info()
+    html = render_html(services, server_ip, status_map, server_info)
     tmp_path = HTML_PATH.with_name(HTML_PATH.name + ".tmp")
     try:
         tmp_path.write_text(html)
