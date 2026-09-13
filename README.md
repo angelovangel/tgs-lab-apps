@@ -8,13 +8,15 @@ Containerized deployment setup for Opentrons automation and Nextflow minimapper 
 
 | Service | Port | Notes |
 | --- | ---: | --- |
+| `landing` | `8088` | Static landing page with app status |
 | `rapid-barcoding-ont` | `3801` | Setup ONT rapid barcoding on Opentrons OT-2 |
 | `custom-transfer-opentrons` | `3802` | One step transfer setup on OT-2 and Flex |
 | `kinnex-ot2` | `3803` | Setup Kinnex PCR on Opentrons OT-2 |
 | `sanger-opentrons` | `3804` | Setup Sanger reactions on Opentrons OT-2 |
 | `tracer` | `3805` | Sanger files QC |
 | `nxf-minimapper` | `3806` | `minimapper-app`; uses Singularity by default |
-| `nxf-shiny` | `3807` | Run various Nextflow apps; use `-profile singularity`; server needs a `/mnt` path |
+| `zinter` | `3808` | Generate 2D barcode labels for printing |
+| `faster-app` | `3809` | FASTQ file stats; runs in your browser |
 
 ---
 
@@ -53,9 +55,10 @@ docker compose up -d rapid-barcoding-ont
 # to stop
 docker compose down
 ```
-You may need to allow access to ports `3801`to`3806` on your server firewall.
+You may need to allow access to the app ports on your server firewall.
 ```bash
-sudo ufw allow 3801:3806/tcp
+sudo ufw allow 3801:3809/tcp
+sudo ufw allow 8088/tcp
 sudo ufw reload
 sudo ufw status
 ```

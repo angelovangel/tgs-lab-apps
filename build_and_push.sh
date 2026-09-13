@@ -26,7 +26,6 @@ ALL_APPS=(
   "sanger-opentrons"
   "tracer"
   "minimapper-app"
-  "nxf-shiny"
   "zinter"
   "faster-app"
 )
