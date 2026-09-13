@@ -174,7 +174,7 @@ def get_compose_status_map() -> dict[str, str]:
                     "--filter",
                     f"label=com.docker.compose.project={project_name}",
                     "--format",
-                    "{{.Label \"com.docker.compose.service\"}}|{{.State}}",
+                    "{{.Label \"com.docker.compose.service\"}}|{{.Status}}",
                 ],
                 stderr=subprocess.DEVNULL,
                 text=True,
@@ -204,19 +204,27 @@ def get_compose_status_map() -> dict[str, str]:
     return status_map
 
 
-def status_label(raw_status: str) -> str:
+def status_label(raw_status: str) -> tuple[str, str]:
+    """Return (label, badge_text) for the given raw Docker status string."""
     status = (raw_status or "").strip()
     if not status:
-        return "Not started"
+        return "Not started", "Not started"
 
     normalized = status.lower()
     if normalized == "running" or normalized.startswith("up "):
-        return "Running"
+        # Docker Compose format: "Up 2 hours", "Up About an hour", etc.
+        # Extract the duration part after "Up "
+        if normalized.startswith("up "):
+            since = status[3:].strip()
+            badge = f"Running · {since}" if since else "Running"
+        else:
+            badge = "Running"
+        return "Running", badge
     if normalized.startswith("restarting"):
-        return "Restarting"
+        return "Restarting", status
     if normalized in {"created", "exited", "dead", "paused"} or normalized.startswith("exited"):
-        return "Stopped"
-    return status.title()
+        return "Stopped", status
+    return status.title(), status
 
 
 def render_html(services, server_ip: str, status_map: dict[str, str]) -> str:
@@ -227,7 +235,7 @@ def render_html(services, server_ip: str, status_map: dict[str, str]) -> str:
         notes = svc["notes"]
         url = f"http://{server_ip}:{port}"
         raw_status = status_map.get(name, "")
-        label = status_label(raw_status)
+        label, badge_text = status_label(raw_status)
         if label == "Running":
             color = "#198754"
         elif label == "Restarting":
@@ -236,14 +244,13 @@ def render_html(services, server_ip: str, status_map: dict[str, str]) -> str:
             color = "#dc3545"
         else:
             color = "#6c757d"
-        badge_text = raw_status or "Not started"
         rows.append(
             """
             <tr>
               <td>{name}</td>
               <td><a href="{url}" target="_blank" rel="noopener noreferrer">{url}</a></td>
               <td>{notes}</td>
-              <td><span style="display:inline-block;padding:4px 8px;border-radius:999px;background-color:{color};color:white;font-weight:bold;">{badge_text}</span></td>
+              <td><span style="display:inline-block;padding:4px 8px;border-radius:999px;background-color:{color};color:white;">{badge_text}</span></td>
             </tr>
             """.format(name=name, url=url, notes=notes, color=color, badge_text=badge_text)
         )
