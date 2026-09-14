@@ -10,7 +10,7 @@ import time
 
 ROOT = Path(__file__).resolve().parent
 PORT = int(os.environ.get("PORT", "8088"))
-REFRESH_SECONDS = int(os.environ.get("REFRESH_SECONDS", "15"))
+REFRESH_SECONDS = int(os.environ.get("REFRESH_SECONDS", "5"))
 
 
 def update_status_loop():

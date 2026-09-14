@@ -15,7 +15,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       SERVER_IP: ${SERVER_IP:-}
-      REFRESH_SECONDS: ${REFRESH_SECONDS:-15}
+      REFRESH_SECONDS: ${REFRESH_SECONDS:-5}
       PORT: 8088
     command: >
       sh -c 'apk add --no-cache docker-cli >/dev/null 2>&1 || true; exec python server.py'

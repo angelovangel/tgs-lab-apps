@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parent
 SERVICES_PATH = ROOT / "services.json"
 HTML_PATH = ROOT / "index.html"
 COMPOSE_FILE = ROOT.parent / "docker-compose.yml"
-REFRESH_SECONDS = int(os.environ.get("REFRESH_SECONDS", "15"))
+REFRESH_SECONDS = int(os.environ.get("REFRESH_SECONDS", "5"))
 
 
 def _is_docker_alias(ip: str) -> bool:
@@ -411,7 +411,7 @@ def render_html(services, server_ip: str, status_map: dict[str, str], server_inf
   </head>
   <body>
     <h1>TGS Lab Apps</h1>
-    <div class="meta">Auto-refreshing every {refresh} seconds</div>
+    <div class="meta">Status update every {refresh} seconds</div>
     <table>
       <thead>
         <tr>
