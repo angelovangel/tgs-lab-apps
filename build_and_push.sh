@@ -28,6 +28,7 @@ ALL_APPS=(
   "minimapper-app"
   "zinter"
   "faster-app"
+  "ont-run-report"
 )
 
 # Filter APPS array if specific target apps are provided in 3rd argument

@@ -124,3 +124,16 @@ services:
     ports:
       - "3809:8000"
     restart: unless-stopped
+
+  ont-run-report:
+    image: ${DOCKER_USER:-aangeloo}/ont-run-report:latest
+    build:
+      context: ../ont-run-report
+      dockerfile: Dockerfile
+    container_name: shiny_ont_run_report
+    ports:
+      - "3810:3838"
+    restart: unless-stopped
+    environment:
+      - TZ=UTC
+      - SCRIPT_PATH=/usr/local/bin/generate-ont-report.py

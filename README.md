@@ -17,6 +17,7 @@ Containerized deployment setup for Opentrons automation and Nextflow minimapper 
 | `nxf-minimapper` | `3806` | `minimapper-app`; uses Singularity by default |
 | `zinter` | `3808` | Generate 2D barcode labels for printing |
 | `faster-app` | `3809` | FASTQ file stats; runs in your browser |
+| `ont-run-report` | `3810` | Generate HTML report for ONT runs |
 
 ---
 
