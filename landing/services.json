@@ -2,37 +2,37 @@
   {
     "name": "rapid-barcoding-ont",
     "port": 3801,
-    "notes": "ONT rapid barcoding"
+    "notes": "ONT rapid barcoding on Opentrons/i5"
   },
   {
     "name": "custom-transfer-opentrons",
     "port": 3802,
-    "notes": "Transfer workflow"
+    "notes": "One step transfer workflow on Opentrons OT-2 and Flex"
   },
   {
     "name": "kinnex-ot2",
     "port": 3803,
-    "notes": "Kinnex PCR setup"
+    "notes": "Kinnex PCR setup on Opentrons OT-2"
   },
   {
     "name": "sanger-opentrons",
     "port": 3804,
-    "notes": "Sanger setup"
+    "notes": "Sanger sequencing setup on Opentrons OT-2"
   },
   {
     "name": "tracer",
     "port": 3805,
-    "notes": "Sanger QC"
+    "notes": "Sanger files QC"
   },
   {
     "name": "nxf-minimapper",
     "port": 3806,
-    "notes": "minimapper-app; Singularity"
+    "notes": "Nextflow minimapper-app; Singularity"
   },
   {
     "name": "zinter",
     "port": 3808,
-    "notes": "Shiny app to generate 2D barcode labels for printing"
+    "notes": "Generate 2D barcode labels for printing"
   },
   {
     "name": "faster-app",
