@@ -137,3 +137,14 @@ services:
     environment:
       - TZ=UTC
       - SCRIPT_PATH=/usr/local/bin/generate-ont-report.py
+
+  pricing:
+    image: python:3.12-alpine
+    container_name: pricing_web
+    working_dir: /app
+    volumes:
+      - ../pricing:/app:rw
+    command: python server.py
+    ports:
+      - "3811:3811"
+    restart: unless-stopped

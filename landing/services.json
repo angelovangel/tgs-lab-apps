@@ -42,6 +42,11 @@
   {
     "name": "ont-run-report",
     "port": 3810,
-    "notes": "Generate HTML report for ONT runs"
+    "notes": "Generate HTML report for ONT/PacBio runs"
+  },
+  {
+    "name": "pricing",
+    "port": 3811,
+    "notes": "Lab Services Price List"
   }
 ]
