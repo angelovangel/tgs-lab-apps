@@ -47,6 +47,7 @@
   {
     "name": "pricing",
     "port": 3811,
+    "path": "/price_list.html",
     "notes": "Lab Services Price List"
   }
 ]

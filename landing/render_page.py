@@ -332,7 +332,8 @@ def render_html(services, server_ip: str, status_map: dict[str, str], server_inf
         name = svc["name"]
         port = svc["port"]
         notes = svc["notes"]
-        url = f"http://{server_ip}:{port}"
+        path = svc.get("path", "")
+        url = f"http://{server_ip}:{port}{path}"
         raw_status = status_map.get(name, "")
         label, badge_text = status_label(raw_status)
         if label == "Running":
