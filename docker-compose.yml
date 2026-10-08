@@ -123,6 +123,8 @@ services:
     container_name: faster_app
     ports:
       - "3809:8000"
+    command: >
+      sh -c 'ln -sfn /app/public /app/public/faster-app && exec python -m http.server 8000 --directory /app/public'
     restart: unless-stopped
 
   ont-run-report:
