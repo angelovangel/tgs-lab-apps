@@ -144,7 +144,12 @@ services:
     working_dir: /app
     volumes:
       - ../pricing:/app:rw
-    command: python server.py
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: ${GOOGLE_APPLICATION_CREDENTIALS:-/app/secrets/tgs-pricing-1f2045547346.json}
+      GOOGLE_SPREADSHEET_ID: ${GOOGLE_SPREADSHEET_ID:-19ByaGb1-X7Z_6_Dwhba1Efn78EQ2Ue9n9uXdAIHCk-U}
+      GOOGLE_SHEET_NAME: ${GOOGLE_SHEET_NAME:-Sheet1}
+    command: >
+      sh -c 'python -m pip install --no-cache-dir -r requirements.txt && python server.py'
     ports:
       - "3811:3811"
     restart: unless-stopped
