@@ -160,3 +160,21 @@ services:
     ports:
       - "3811:3811"
     restart: unless-stopped
+
+  gelsym:
+    image: ${DOCKER_USER:-aangeloo}/gelsym:latest
+    build:
+      context: ../gelsym
+      dockerfile: Dockerfile
+    container_name: gelsym
+    ports:
+      - "3812:8000"
+    volumes:
+      # Models downloaded on first use persist here (the default models ship in the image).
+      - gelsym-models:/app/models
+    restart: unless-stopped
+    environment:
+      - TZ=UTC
+
+volumes:
+  gelsym-models:

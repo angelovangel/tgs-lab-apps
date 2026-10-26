@@ -48,5 +48,10 @@
     "name": "pricing",
     "port": 3811,
     "notes": "Lab Services Price List"
+  },
+  {
+    "name": "gelsym",
+    "port": 3812,
+    "notes": "Agarose gel band detection (GelGenie) and quantification"
   }
 ]

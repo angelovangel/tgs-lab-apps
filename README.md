@@ -18,6 +18,8 @@ Containerized deployment setup for Opentrons automation and Nextflow minimapper 
 | `zinter` | `3808` | Generate 2D barcode labels for printing |
 | `faster-app` | `3809` | FASTQ file stats; runs in your browser |
 | `ont-run-report` | `3810` | Generate HTML report for ONT runs |
+| `pricing` | `3811` | Lab services price list |
+| `gelsym` | `3812` | Agarose gel band detection (GelGenie) and quantification |
 
 ---
 
@@ -58,7 +60,7 @@ docker compose down
 ```
 You may need to allow access to the app ports on your server firewall.
 ```bash
-sudo ufw allow 3801:3809/tcp
+sudo ufw allow 3801:3812/tcp
 sudo ufw allow 8088/tcp
 sudo ufw reload
 sudo ufw status

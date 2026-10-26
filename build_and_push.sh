@@ -29,6 +29,7 @@ ALL_APPS=(
   "zinter"
   "faster-app"
   "ont-run-report"
+  "gelsym"
 )
 
 # Filter APPS array if specific target apps are provided in 3rd argument
