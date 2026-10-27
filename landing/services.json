@@ -52,6 +52,6 @@
   {
     "name": "gelsym",
     "port": 3812,
-    "notes": "Agarose gel band detection (GelGenie) and quantification"
+    "notes": "Agarose gel band detection and quantification"
   }
 ]
