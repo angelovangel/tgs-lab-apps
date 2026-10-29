@@ -350,7 +350,7 @@ def render_html(services, server_ip: str, status_map: dict[str, str], server_inf
               <td>{name}</td>
               <td><a href="{url}" target="_blank" rel="noopener noreferrer">{url}</a></td>
               <td>{notes}</td>
-              <td><span style="display:inline-block;padding:4px 8px;border-radius:999px;background-color:{color};color:white;">{badge_text}</span></td>
+              <td><span style="display:inline-block;padding:4px 8px;border-radius:999px;background-color:{color};color:white;white-space:nowrap;">{badge_text}</span></td>
             </tr>
             """.format(name=name, url=url, notes=notes, color=color, badge_text=badge_text)
         )
